@@ -15,6 +15,6 @@ gol: game.o file.o create_grid.o
 	nvcc $(INCLUDES) -o gol build/game.o build/file.o build/create_grid.o src/main.cu
 
 clean:
-	$(RM) build/* gol output/*
+	$(RM) build/*.o gol output/*.bin
 
 all: gol
