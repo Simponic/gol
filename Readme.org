@@ -1,0 +1,82 @@
+#+AUTHOR: Logan Hunt
+
+* CS 5030 Final Project
+This is GOL. That's it. (Not done yet)
+
+[[https://youtu.be/N_aUWYNqpeY][A Video Example]]
+
+There are multiple implementations in this project. Each one uses the same code, just modified slightly. Each directory contains a Makefile which will build that implementation. For most, a simple ~cd~ into each directory and ~make~ will do (see build instructions).
+
+Every ~make~ will end you up with a ~gol~ binary. However, each implementation takes a different number of arguments (the Cuda one needs to be run in a slightly different fashion).
+
+** Compiling binary output to a video
+Every implementation produces file I/O exactly the same. When logging is turned on, each iteration in the output directory is labelled ~iteration-XXXXXXX.bin~ where iteration number is padded by 7 zeros. 
+
+There is a script in ~graphics~ that converts a raw ~unsigned char~ data binary into a .bmp where a zero is black and (with some help from [[https://stackoverflow.com/a/47785639/15819675][this Stack Overflow post]]). This program is utilized by ~make-movie.sh~ to convert every .bin in a directory to a .bmp. Then, these .bmps can be compiled into a video file with the arguments that are described in ~make-movie.sh~ (just provide none and a usage string will be ~echo~ed).
+
+For example to make a movie of the outputs generated in ~cuda-global/output~ where each binary file is a grid of size 1920x1080 (at 8fps to a file named output-1920.mp4):
+
+~cd graphics~
+
+~make~
+
+(On CHPC you will need to ~module load ffmpeg~)
+
+~./make-movie.sh ../cuda-global/output 1920 1080 8 output-1920~
+
+** Building
+*** MPI
+Not done yet
+
+*** Cuda
+Firstly, ~cd~ into ~cuda-global~ and ~make~.
+
+Then start an interactive gpu session on notchpeak:
+
+~salloc -n 1 -N 1 -t 0:10:00 -p notchpeak-shared-short -A notchpeak-shared-short --gres=gpu:k80:1~
+
+This implementation takes these arguments:
+
+~srun ./gol simulate <filename | random> <width> <height> <iterations> <log-each-step?1:0> <block-size>~
+
+For example to do 1000 iterations at 1920x1080 with a random starting position (the last ~1~ will log each iteration into the ~output~ directory) with a block size of 32:
+
+~srun ./gol simulate random 1920 1080 1000 1 32~
+
+*** OpenMP
+Firstly, ~cd~ into ~openmp~ and ~make~.
+
+This implementation takes these arguments:
+
+~./gol simulate <filename | random> <width> <height> <iterations> <log-each-step?1:0> <num_threads>~
+
+For example to do 100 iterations with 8 threads at 800x600 with a random starting position (and log each iteration into the ~output~ directory):
+
+~./gol simulate random 800 600 100 1 8~
+
+*** Serial
+The most basic of the three implementations.
+
+Firstly, ~cd~ into ~serial~ and ~make~.
+
+This implementation takes these arguments:
+
+~./gol simulate <filename | random> <width> <height> <iterations> <log-each-step?1:0>~
+
+For example to do 10 iterations with 8 threads at 400x400 with a random starting position (and log to ~output~):
+
+~./gol simulate random 400 400 10 1~
+
+
+** Creating an initial starting grid
+Each ~gol~ binary also has a ~create-grid~ mode, mainly used for debugging:
+
+~./gol create-grid <width> <height> <filename>~
+
+You'll be prompted to enter in grid values (0/1) for each row, each seperated by a space.
+
+For example to make a 10x10 grid and output it to ~output/testing.bin~:
+
+~./gol create-grid 10 10 output/testing.bin~
+
+And then this file can be used in the ~filename~ argument when using ~simulate~.
