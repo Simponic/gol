@@ -40,13 +40,12 @@ void simulate(int argc, char** argv) {
   struct GAME game;
   game.padding = PADDING;
   int iterations, log_each_step, block_size;
-  if (argc == 8) {
+  if (argc == 7) {
     filename = argv[2];
     game.width = atoi(argv[3]);
     game.height = atoi(argv[4]);
     iterations = atoi(argv[5]);
     log_each_step = atoi(argv[6]);
-    block_size = atoi(argv[7]);
   } else {
     printf("Usage: ./gol simulate <filename | random> <width> <height> <iterations> <log-each-step?1:0> <block-size>\n");
     filename = "random";
@@ -80,9 +79,9 @@ void simulate(int argc, char** argv) {
 
   game.grid = grid_d;
 
-  int grid_num = (int)ceil((game.width+(2*game.padding))/(float)block_size);
+  int grid_num = (int)ceil((game.width+(2*game.padding))/(float)BLOCK);
   dim3 dim_grid(grid_num, grid_num, 1);
-  dim3 dim_block(block_size, block_size, 1);
+  dim3 dim_block(BLOCK, BLOCK, 1);
 
   cudaEvent_t startLife, stopLife;
   cudaEventCreate(&startLife);
