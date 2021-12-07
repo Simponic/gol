@@ -5,7 +5,7 @@ __device__ int neighbors(struct GAME game, int x, int y) {
 
   for (int dy = -1; dy <= 1; dy++) {
     for (int dx = -1; dx <= 1; dx++) {
-      if (!(dx == 0 && dy == 0) && (x+dx) > 0 && (y+dy) > 0 && (x+dx) < game.width+(game.padding*2) && (y+dy) < game.height+(game.padding*2)) {
+      if (!(dx == 0 && dy == 0) && (x+dx) >= 0 && (y+dy) >= 0 && (x+dx) < game.width+(game.padding*2) && (y+dy) < game.height+(game.padding*2)) {
         if (game.grid[(y+dy) * (game.width+game.padding*2) + (x+dx)]) {
           n++;
         }

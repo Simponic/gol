@@ -18,7 +18,7 @@
  */
 #define BLOCK 32
 #define PADDING 10
-//#define VERBOSE 1
+#define VERBOSE 1
 #define SEED 100
 
 // gpuErrchk source: https://stackoverflow.com/questions/14038589/what-is-the-canonical-way-to-check-for-errors-using-the-cuda-runtime-api
@@ -39,7 +39,7 @@ void simulate(int argc, char** argv) {
   char* filename;
   struct GAME game;
   game.padding = PADDING;
-  int iterations, log_each_step, block_size;
+  int iterations, log_each_step;
   if (argc == 7) {
     filename = argv[2];
     game.width = atoi(argv[3]);
@@ -47,7 +47,7 @@ void simulate(int argc, char** argv) {
     iterations = atoi(argv[5]);
     log_each_step = atoi(argv[6]);
   } else {
-    printf("Usage: ./gol simulate <filename | random> <width> <height> <iterations> <log-each-step?1:0> <block-size>\n");
+    printf("Usage: ./gol simulate <filename | random> <width> <height> <iterations> <log-each-step?1:0>\n");
     filename = "random";
     game.height = 10;
     game.width = 10;
@@ -69,10 +69,10 @@ void simulate(int argc, char** argv) {
   char iteration_file[1024];
 
   unsigned char* grid_d;
-  unsigned char* newGrid_d;
+  unsigned char* newGrid;
   gpuErrchk(cudaMalloc(&grid_d, size));
   gpuErrchk(cudaMemcpy(grid_d, game.grid, size, cudaMemcpyHostToDevice));
-  gpuErrchk(cudaMalloc(&newGrid_d, size));
+  gpuErrchk(cudaMalloc(&newGrid, size));
 
   unsigned char* grid_h = (unsigned char*)malloc(size);
   unsigned char* temp;
@@ -92,15 +92,15 @@ void simulate(int argc, char** argv) {
   for (int i = 0; i <= iterations; i++) {
     if (i > 0) {
       cudaEventRecord(startLife);
-      next<<<dim_grid, dim_block>>>(game, newGrid_d);
+      next<<<dim_grid, dim_block>>>(game, newGrid);
       cudaEventRecord(stopLife);
       cudaEventSynchronize(stopLife);
       cudaEventElapsedTime(&localTime, startLife, stopLife);
       timeComputingLife += localTime/1000;
 
       temp = game.grid;
-      game.grid = newGrid_d;
-      newGrid_d = temp;
+      game.grid = newGrid;
+      newGrid = temp;
     }
     if (log_each_step) {
       gpuErrchk(cudaMemcpy(grid_h, game.grid, size, cudaMemcpyDeviceToHost));
@@ -125,7 +125,7 @@ void simulate(int argc, char** argv) {
   clock_t totalEnd = clock();
   printf("\n===Timing===\nTime computing life: %f\nClock time: %f\n", timeComputingLife, ((double)totalEnd - (double)totalStart)/CLOCKS_PER_SEC);
 
-  cudaFree(&newGrid_d);
+  cudaFree(&newGrid);
   cudaFree(&grid_d);
   cudaFree(&game.grid);
   free(grid_h);
