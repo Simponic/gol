@@ -1,0 +1,4 @@
+
+===Timing===
+Time computing life: 4.398371
+Clock time: 25.650748

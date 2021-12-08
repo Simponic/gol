@@ -1,5 +1,6 @@
 #include "create_grid.h"
 
+// Print entirety of a grid to verify input 
 void print_grid(struct GAME* game) {
   printf("\n===GRID===\n");
   for (int y = 0; y < game->height; y++) {
@@ -10,6 +11,7 @@ void print_grid(struct GAME* game) {
   }
 }
 
+// Go through user input
 void create_grid(int argc, char** argv) {
   char* filename;
   struct GAME game;

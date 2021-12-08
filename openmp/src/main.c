@@ -19,6 +19,7 @@
 //#define VERBOSE 1
 #define SEED 100
 
+// Do the simulation
 void simulate(int argc, char** argv) {
   srand(SEED);
   char* filename;
@@ -26,6 +27,7 @@ void simulate(int argc, char** argv) {
   game.padding = PADDING;
   int iterations, log_each_step, threads;
   if (argc == 8) {
+    // Parse the arguments
     filename = argv[2];
     game.width = atoi(argv[3]);
     game.height = atoi(argv[4]);
@@ -51,6 +53,7 @@ void simulate(int argc, char** argv) {
     memset(game.grid[i], 0, game.width+(2*game.padding));
   }
 
+  // Choose where to read initial position
   if (strcmp(filename, "random") == 0) {
     randomize(&game);
   } else {
@@ -62,16 +65,19 @@ void simulate(int argc, char** argv) {
   double start, end;
 
   for (int i = 0; i <= iterations; i++) {
+    // Iteration 0 will just be the initial grid
     if (i > 0) {
-      // Iteration 0 is just the input board
       start = omp_get_wtime();
+      // Compute the next grid with threads
       next(&game, threads);
       end = omp_get_wtime();
       time_computing_life += ((double) (end - start));
     }
     if (log_each_step) {
+      // If we are logging each step, perform IO operations
       #if VERBOSE == 1
       printf("\n===Iteration %i===\n", i);
+      // Print the board without the padding elements
       for (int y = game.padding; y < game.height+game.padding; y++) {
         for (int x = game.padding; x < game.width+game.padding; x++) {
           printf("%s ", game.grid[y][x] ? "X" : " ");
@@ -80,6 +86,7 @@ void simulate(int argc, char** argv) {
       }
       printf("===End iteration %i===\n", i);
       #endif
+      // Save to a file
       sprintf(iteration_file, "output/iteration-%07d.bin", i);
       write_out(iteration_file, &game);
     }

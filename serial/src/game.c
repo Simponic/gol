@@ -1,5 +1,6 @@
 #include "game.h"
 
+// Calculate the number of live neighbors a cell has
 int neighbors(struct GAME* game, int x, int y) {
   int n = 0;
   for (int dy = -1; dy <= 1; dy++) {
@@ -15,6 +16,7 @@ int neighbors(struct GAME* game, int x, int y) {
   return n;
 }
 
+// Compute the next iteration of a board
 void next(struct GAME* game) {
   unsigned char** newGrid = malloc(sizeof(unsigned char*) * (game->height+(game->padding*2)));
   int size = sizeof(unsigned char) * (game->width+(game->padding*2));
@@ -23,6 +25,7 @@ void next(struct GAME* game) {
     memset(newGrid[y], 0, size);
   }
 
+  // Iterate through each cell
   for (int y = 0; y < game->height+(game->padding*2); y++) {
     for (int x = 0; x < game->width+(game->padding*2); x++) {
       int my_neighbors = neighbors(game, x, y);
@@ -44,6 +47,7 @@ void next(struct GAME* game) {
   game->grid = newGrid;
 }
 
+// Randomly assign life value to each cell
 void randomize(struct GAME* game) {
   for (int y = game->padding; y < game->height+game->padding; y++) {
     for (int x = game->padding; x < game->width+game->padding; x++) {

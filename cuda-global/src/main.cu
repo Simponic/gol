@@ -18,7 +18,7 @@
  */
 #define BLOCK 32
 #define PADDING 10
-#define VERBOSE 1
+//#define VERBOSE 1
 #define SEED 100
 
 // gpuErrchk source: https://stackoverflow.com/questions/14038589/what-is-the-canonical-way-to-check-for-errors-using-the-cuda-runtime-api
@@ -33,14 +33,16 @@ true) {
   }
 }
 
+// Do the simulation
 void simulate(int argc, char** argv) {
   srand(SEED);
-  clock_t totalStart = clock();
+  clock_t global_start = clock();
   char* filename;
   struct GAME game;
   game.padding = PADDING;
   int iterations, log_each_step;
   if (argc == 7) {
+    // Parse the arguments
     filename = argv[2];
     game.width = atoi(argv[3]);
     game.height = atoi(argv[4]);
@@ -60,6 +62,7 @@ void simulate(int argc, char** argv) {
   game.grid = (unsigned char*)malloc(size);
   memset(game.grid, 0, size);
 
+  // Choose where to read initial position
   if (strcmp(filename, "random") == 0) {
     randomize(&game);
   } else {
@@ -68,43 +71,53 @@ void simulate(int argc, char** argv) {
 
   char iteration_file[1024];
 
+  // Allocate device memory
   unsigned char* grid_d;
   unsigned char* newGrid;
   gpuErrchk(cudaMalloc(&grid_d, size));
-  gpuErrchk(cudaMemcpy(grid_d, game.grid, size, cudaMemcpyHostToDevice));
   gpuErrchk(cudaMalloc(&newGrid, size));
+  gpuErrchk(cudaMemcpy(grid_d, game.grid, size, cudaMemcpyHostToDevice)); // Copy the initial grid to the device
+  free(game.grid);
+  game.grid = grid_d; // Use the device copy
 
+  // The grid that we will copy results 
   unsigned char* grid_h = (unsigned char*)malloc(size);
   unsigned char* temp;
 
-  game.grid = grid_d;
-
-  int grid_num = (int)ceil((game.width+(2*game.padding))/(float)BLOCK);
-  dim3 dim_grid(grid_num, grid_num, 1);
+  // Calculate grid width for kernel
+  int grid_width = (int)ceil((game.width+(2*game.padding))/(float)BLOCK);
+  int grid_height = (int)ceil((game.height+(2*game.padding))/(float)BLOCK);
+  dim3 dim_grid(grid_width, grid_height, 1);
   dim3 dim_block(BLOCK, BLOCK, 1);
 
-  cudaEvent_t startLife, stopLife;
-  cudaEventCreate(&startLife);
-  cudaEventCreate(&stopLife);
-  double timeComputingLife = 0;
-  float localTime = 0;
+  // Timing
+  cudaEvent_t start, end;
+  cudaEventCreate(&start);
+  cudaEventCreate(&end);
+  double time_computing_life = 0;
+  float local_time = 0;
 
   for (int i = 0; i <= iterations; i++) {
+    // Iteration 0 will just be the initial grid
     if (i > 0) {
-      cudaEventRecord(startLife);
+      cudaEventRecord(start);
+      // Compute the next grid
       next<<<dim_grid, dim_block>>>(game, newGrid);
-      cudaEventRecord(stopLife);
-      cudaEventSynchronize(stopLife);
-      cudaEventElapsedTime(&localTime, startLife, stopLife);
-      timeComputingLife += localTime/1000;
+      cudaEventRecord(end);
+      cudaEventSynchronize(end);
+      cudaEventElapsedTime(&local_time, start, end);
+      time_computing_life += local_time/1000;
 
+      // Swap game.grid and newGrid
       temp = game.grid;
       game.grid = newGrid;
       newGrid = temp;
     }
     if (log_each_step) {
+      // If we are logging each step, perform IO operations
       gpuErrchk(cudaMemcpy(grid_h, game.grid, size, cudaMemcpyDeviceToHost));
       #ifdef VERBOSE
+        // Print the board without the padding elements
         printf("\n===Iteration %i===\n", i);
         for (int y = game.padding; y < game.height+game.padding; y++) {
           for (int x = game.padding; x < game.width+game.padding; x++) {
@@ -114,6 +127,7 @@ void simulate(int argc, char** argv) {
         }
         printf("===End iteration %i===\n", i);
       #endif
+      // Save to a file
       sprintf(iteration_file, "output/iteration-%07d.bin", i);
       temp = game.grid;
       game.grid = grid_h;
@@ -122,13 +136,7 @@ void simulate(int argc, char** argv) {
     }
   }
 
-  clock_t totalEnd = clock();
-  printf("\n===Timing===\nTime computing life: %f\nClock time: %f\n", timeComputingLife, ((double)totalEnd - (double)totalStart)/CLOCKS_PER_SEC);
-
-  cudaFree(&newGrid);
-  cudaFree(&grid_d);
-  cudaFree(&game.grid);
-  free(grid_h);
+  printf("\n===Timing===\nTime computing life: %f\nClock time: %f\n", time_computing_life, ((double)clock() - (double)global_start)/CLOCKS_PER_SEC);
 }
 
 int main(int argc, char** argv) {
