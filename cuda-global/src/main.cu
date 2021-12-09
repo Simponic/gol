@@ -36,7 +36,10 @@ true) {
 // Do the simulation
 void simulate(int argc, char** argv) {
   srand(SEED);
-  clock_t global_start = clock();
+  cudaEvent_t global_start, global_end;
+  cudaEventCreate(&global_start);
+  cudaEventCreate(&global_end);
+  cudaEventRecord(global_start);
   char* filename;
   struct GAME game;
   game.padding = PADDING;
@@ -135,8 +138,12 @@ void simulate(int argc, char** argv) {
       game.grid = temp;
     }
   }
+  cudaEventRecord(global_end);
+  cudaEventSynchronize(global_end);
+  float global_time;
+  cudaEventElapsedTime(&global_time, global_start, global_end);
 
-  printf("\n===Timing===\nTime computing life: %f\nClock time: %f\n", time_computing_life, ((double)clock() - (double)global_start)/CLOCKS_PER_SEC);
+  printf("\n===Timing===\nTime computing life: %f\nClock time: %f\n", time_computing_life, global_time/(double)1000);
 }
 
 int main(int argc, char** argv) {

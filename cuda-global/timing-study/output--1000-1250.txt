@@ -1,4 +1,4 @@
 
 ===Timing===
-Time computing life: 0.254989
-Clock time: 2.240000
+Time computing life: 0.255659
+Clock time: 5.620605

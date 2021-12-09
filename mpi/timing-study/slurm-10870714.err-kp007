@@ -1,0 +1,8 @@
+mkdir: cannot create directory ‘timing-study’: File exists
+
+Lmod is automatically replacing "gcc/4.8.5" with "intel/2018.1.163".
+
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) mpich/3.2.1
+

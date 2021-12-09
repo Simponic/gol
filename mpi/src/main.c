@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <mpi.h>
+#include <stddef.h>
 
 #include "file.h"
 #include "game.h"

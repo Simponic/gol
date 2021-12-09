@@ -5,7 +5,7 @@ int neighbors(struct GAME* game, int x, int y, unsigned char* halo_above, unsign
 
   for (int dy = -1; dy <= 1; dy++) {
     for (int dx = -1; dx <= 1; dx++) {
-      if (!(dx == 0 && dy == 0) && (x+dx) > 0 && (x+dx) < game->width+(game->padding*2)) {
+      if (!(dx == 0 && dy == 0) && (x+dx) > 0 && (x+dx) < game->width+(game->padding*2) && (y+dy) < game->height) {
         if (y+dy == -1 && halo_above != NULL) {
           if (halo_above[x+dx]) {
             n++;
