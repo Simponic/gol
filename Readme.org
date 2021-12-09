@@ -1,7 +1,7 @@
 #+AUTHOR: Logan Hunt
 
 * CS 5030 Final Project
-[[./report/report.pdf][Report]]
+[[./report/report.pdf][Report]] (you may need to download it to view the links in the document).
 
 This is GOL. That's it. 
 
