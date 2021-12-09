@@ -1,7 +1,9 @@
 #+AUTHOR: Logan Hunt
 
 * CS 5030 Final Project
-This is GOL. That's it. (Not done yet)
+[[./report/report.pdf][Report]]
+
+This is GOL. That's it. 
 
 [[https://youtu.be/N_aUWYNqpeY][A Video Example]]
 
@@ -26,7 +28,11 @@ For example to make a movie of the outputs generated in ~cuda-global/output~ whe
 
 ** Building
 *** MPI
-Not done yet
+Firstly, ~module load gcc mpich~. Then ~cd~ into ~mpi~ and ~make~.
+
+Then, you can run with 
+
+~mpirun -np <cores> ./gol simulate <filename | random> <width> <height> <iterations> <log-each-step?1:0>~
 
 *** Cuda
 Firstly, ~cd~ into ~cuda-global~ and ~make~.
@@ -37,7 +43,7 @@ Then start an interactive gpu session on notchpeak:
 
 This implementation takes these arguments:
 
-~srun ./gol simulate <filename | random> <width> <height> <iterations> <log-each-step?1:0> <block-size>~
+~srun ./gol simulate <filename | random> <width> <height> <iterations> <log-each-step?1:0>~
 
 For example to do 1000 iterations at 1920x1080 with a random starting position (the last ~1~ will log each iteration into the ~output~ directory) with a block size of 32:
 
