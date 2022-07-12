@@ -5,16 +5,16 @@
 
 [[https://youtu.be/N_aUWYNqpeY][A Video Example]]
 
-There are multiple implementations in this project. Each one uses the same code, just modified slightly. Each directory contains a Makefile which will build that implementation. For most, a simple ~cd~ into each directory and ~make~ will do (see build instructions).
+There are multiple implementations in this project. Each directory contains a Makefile which will build that implementation. For most, a simple ~cd~ and ~make~ will do.
 
-Every ~make~ will finish with a ~gol~ binary. However, each implementation takes a different number of arguments. The Cuda implementation needs to be run in a slightly different fashion.
+Every ~make~ will builds a ~gol~ binary. However, each implementation takes a different number of arguments, as documented below. The Cuda implementation needs to be run in a slightly different fashion.
 
 ** Compiling binary output to a video
-Every implementation produces file I/O exactly the same. When logging is turned on, each iteration in the output directory is labelled ~iteration-XXXXXXX.bin~ where iteration number is padded by 7 zeros. 
+Every implementation produces file I/O exactly the same. When logging is turned on, each iteration in the output directory is labelled ~iteration-XXXXXXX.bin~ where iteration number is padded by 7 to make life easy. 
 
-There is a script in ~graphics~ that converts a raw ~unsigned char~ binary dump into a .bmp (with some help from [[https://stackoverflow.com/a/47785639/15819675][this Stack Overflow post]]). ~make-movie.sh~ converts a directory of ordered binary dumps to a video file with the arguments that are described in ~make-movie.sh~ (just provide none and a usage string will be ~echo~ed).
+There is a script in ~graphics~ that converts a raw binary dump into a .bmp (with some help from [[https://stackoverflow.com/a/47785639/15819675][this Stack Overflow post]]). ~make-movie.sh~ converts a directory of ordered binary dumps to a video file with the arguments that are described in ~make-movie.sh~ (just provide none and a usage string will be ~echo~ed).
 
-For example to make a movie of the outputs generated in ~cuda-global/output~ where each binary file is a grid of size 1920x1080 (at 8fps to a file named output-1920.mp4):
+For instance, to make a movie of the outputs generated in ~cuda-global/output~ where each binary file is a grid of size 1920x1080 (at 8fps to a file named output-1920.mp4):
 
 ~cd graphics~
 
